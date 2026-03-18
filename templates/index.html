@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>San José Seguro</title>
 
 <style>
@@ -14,6 +18,10 @@ color:white;
 text-align:center;
 }
 
+h2{
+margin-top:10px;
+}
+
 #hud{
 font-size:20px;
 margin:10px;
@@ -22,23 +30,26 @@ margin:10px;
 canvas{
 border:4px solid #1b5e20;
 background:#1f6b3a;
+width:95%;
+max-width:1000px;
+height:auto;
 }
 
+/* telefono */
+
 #phone{
-position:absolute;
-right:20px;
-top:120px;
-width:200px;
-height:320px;
 background:#111;
 border-radius:15px;
 color:#00ffc3;
 padding:10px;
 font-size:14px;
+width:200px;
+margin:auto;
+margin-top:15px;
 }
 
 #overlay{
-position:absolute;
+position:fixed;
 top:0;
 left:0;
 width:100%;
@@ -51,7 +62,26 @@ flex-direction:column;
 font-size:30px;
 }
 
+/* escritorio */
+
+@media(min-width:900px){
+
+canvas{
+width:1000px;
+height:600px;
+}
+
+#phone{
+position:absolute;
+right:20px;
+top:120px;
+margin:0;
+}
+
+}
+
 </style>
+
 </head>
 
 <body>
@@ -96,7 +126,7 @@ active:false,
 flash:false
 }
 
-// CASAS BIEN POSICIONADAS
+// casas
 let houses=[
 
 {x:150,y:80},
@@ -113,6 +143,7 @@ let houses=[
 
 // árboles
 let trees=[
+
 {x:100,y:200},
 {x:300,y:200},
 {x:700,y:200},
@@ -122,6 +153,7 @@ let trees=[
 {x:300,y:520},
 {x:700,y:520},
 {x:900,y:520}
+
 ]
 
 // alerta actual
@@ -132,11 +164,13 @@ document.getElementById("log").innerHTML+="<div>"+msg+"</div>"
 }
 
 function playSiren(){
+
 let audio=new Audio("https://actions.google.com/sounds/v1/alarms/siren_whistle.ogg")
 audio.play()
+
 }
 
-// alerta aleatoria
+// alerta
 function spawnAlert(){
 
 if(reports>=5) return
@@ -238,16 +272,14 @@ thiefEscaped()
 function endGame(){
 
 document.getElementById("overlay").style.display="flex"
-document.getElementById("overlay").innerHTML=
-"🚓 Ladrón detenido"
+document.getElementById("overlay").innerHTML="🚓 Ladrón detenido"
 
 }
 
 function thiefEscaped(){
 
 document.getElementById("overlay").style.display="flex"
-document.getElementById("overlay").innerHTML=
-"⚠️ El ladrón escapó"
+document.getElementById("overlay").innerHTML="⚠️ El ladrón escapó"
 
 }
 
@@ -259,6 +291,7 @@ ctx.fillStyle="#6d4c41"
 ctx.fillRect(t.x+4,t.y+8,4,10)
 
 ctx.fillStyle="#2e7d32"
+
 ctx.beginPath()
 ctx.arc(t.x,t.y,10,0,Math.PI*2)
 ctx.fill()
@@ -291,6 +324,7 @@ ctx.fillRect(0,280,1000,80)
 ctx.fillRect(460,0,80,600)
 
 // líneas
+
 ctx.strokeStyle="white"
 ctx.setLineDash([10,10])
 
@@ -307,6 +341,7 @@ ctx.stroke()
 ctx.setLineDash([])
 
 // casas
+
 houses.forEach(h=>{
 
 ctx.fillStyle="#795548"
@@ -343,10 +378,12 @@ drawMap()
 drawAlert()
 
 // ladrón
+
 ctx.fillStyle="red"
 ctx.fillRect(thief.x,thief.y,25,25)
 
 // policía
+
 if(police.active){
 
 ctx.fillStyle=police.flash?"red":"blue"

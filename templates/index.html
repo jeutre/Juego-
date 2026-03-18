@@ -33,6 +33,7 @@ background:#1f6b3a;
 width:95%;
 max-width:1000px;
 height:auto;
+touch-action:none;
 }
 
 /* telefono */
@@ -54,12 +55,29 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.85);
-display:none;
+background:rgba(0,0,0,0.92);
+display:flex;
 align-items:center;
 justify-content:center;
 flex-direction:column;
-font-size:30px;
+font-size:24px;
+padding:20px;
+text-align:center;
+}
+
+button{
+padding:12px 25px;
+font-size:18px;
+margin-top:20px;
+border:none;
+border-radius:8px;
+background:#2e7d32;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#43a047;
 }
 
 /* escritorio */
@@ -99,7 +117,35 @@ Alertas: <span id="reports">0</span>/5
 <div id="log"></div>
 </div>
 
-<div id="overlay"></div>
+<div id="overlay">
+
+<h2>🛡️ Bienvenido a San José Seguro</h2>
+
+<p style="max-width:500px;font-size:18px;line-height:1.6">
+
+👀 <b>Un ladrón está rondando el barrio.</b><br><br>
+
+🏠 Los vecinos enviarán <span style="color:yellow"><b>alertas</b></span> cuando detecten algo sospechoso.<br><br>
+
+📱 Tu misión es <b>reportar esas alertas</b> tocándolas en el mapa.<br><br>
+
+🚓 Cuando se acumulen <b>5 alertas</b>, la patrulla saldrá desde la UPC para perseguir al ladrón.<br><br>
+
+⏱️ Si la policía lo atrapa <b>antes de 20 segundos</b>...<br>
+<b style="color:#00ff9c">¡El barrio estará a salvo!</b><br><br>
+
+⚠️ Pero si el tiempo se acaba...<br>
+<b style="color:#ff5252">el ladrón escapará.</b>
+
+</p>
+
+<p style="margin-top:10px">
+💡 <b>Toca los puntos amarillos en el mapa</b>
+</p>
+
+<button onclick="startGame()">▶ Iniciar juego</button>
+
+</div>
 
 <script>
 
@@ -112,13 +158,10 @@ let gameOver=false
 let startTime=null
 let timeLimit=20000
 
-// ladrón
 let thief={x:500,y:320,vx:3,vy:2}
 
-// UPC
 let upc={x:860,y:60}
 
-// policía
 let police={
 x:880,
 y:100,
@@ -126,7 +169,6 @@ active:false,
 flash:false
 }
 
-// casas
 let houses=[
 
 {x:150,y:80},
@@ -141,7 +183,6 @@ let houses=[
 
 ]
 
-// árboles
 let trees=[
 
 {x:100,y:200},
@@ -156,8 +197,14 @@ let trees=[
 
 ]
 
-// alerta actual
 let currentAlert=null
+
+function startGame(){
+
+document.getElementById("overlay").style.display="none"
+spawnAlert()
+
+}
 
 function log(msg){
 document.getElementById("log").innerHTML+="<div>"+msg+"</div>"
@@ -170,7 +217,6 @@ audio.play()
 
 }
 
-// alerta
 function spawnAlert(){
 
 if(reports>=5) return
@@ -186,16 +232,21 @@ y:h.y+75
 
 }
 
-spawnAlert()
-
-canvas.addEventListener("click",function(e){
+function handleClick(e){
 
 if(!currentAlert) return
 
 let rect=canvas.getBoundingClientRect()
 
-let mx=e.clientX-rect.left
-let my=e.clientY-rect.top
+let mx,my
+
+if(e.touches){
+mx=e.touches[0].clientX-rect.left
+my=e.touches[0].clientY-rect.top
+}else{
+mx=e.clientX-rect.left
+my=e.clientY-rect.top
+}
 
 let dx=mx-currentAlert.x
 let dy=my-currentAlert.y
@@ -225,7 +276,10 @@ log("🚓 Patrulla enviada desde la UPC")
 
 }
 
-})
+}
+
+canvas.addEventListener("click",handleClick)
+canvas.addEventListener("touchstart",handleClick)
 
 function moveThief(){
 
@@ -271,15 +325,23 @@ thiefEscaped()
 
 function endGame(){
 
-document.getElementById("overlay").style.display="flex"
-document.getElementById("overlay").innerHTML="🚓 Ladrón detenido"
+showMessage("🚓 ¡Ladrón detenido!")
 
 }
 
 function thiefEscaped(){
 
-document.getElementById("overlay").style.display="flex"
-document.getElementById("overlay").innerHTML="⚠️ El ladrón escapó"
+showMessage("⚠️ El ladrón escapó")
+
+}
+
+function showMessage(text){
+
+let overlay=document.getElementById("overlay")
+
+overlay.style.display="flex"
+
+overlay.innerHTML=text+"<br><br><button onclick='location.reload()'>Jugar otra vez</button>"
 
 }
 
@@ -316,14 +378,10 @@ function drawMap(){
 ctx.fillStyle="#1f6b3a"
 ctx.fillRect(0,0,1000,600)
 
-// avenida horizontal
 ctx.fillStyle="#555"
 ctx.fillRect(0,280,1000,80)
 
-// avenida vertical
 ctx.fillRect(460,0,80,600)
-
-// líneas
 
 ctx.strokeStyle="white"
 ctx.setLineDash([10,10])
@@ -339,8 +397,6 @@ ctx.lineTo(500,600)
 ctx.stroke()
 
 ctx.setLineDash([])
-
-// casas
 
 houses.forEach(h=>{
 
@@ -377,12 +433,8 @@ ctx.clearRect(0,0,canvas.width,canvas.height)
 drawMap()
 drawAlert()
 
-// ladrón
-
 ctx.fillStyle="red"
 ctx.fillRect(thief.x,thief.y,25,25)
-
-// policía
 
 if(police.active){
 
